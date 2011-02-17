@@ -1,0 +1,31 @@
+#
+# system.prop for generic a1_generic1
+#
+
+rild.libpath=/system/lib/libril-acer-1.so
+rild.libargs=-d /dev/smd0
+persist.rild.nitz_plmn=
+persist.rild.nitz_long_ons_0=
+persist.rild.nitz_long_ons_1=
+persist.rild.nitz_long_ons_2=
+persist.rild.nitz_long_ons_3=
+persist.rild.nitz_short_ons_0=
+persist.rild.nitz_short_ons_1=
+persist.rild.nitz_short_ons_2=
+persist.rild.nitz_short_ons_3=
+persist.radio.skippable.mcclist=466,505
+wifi.interface=eth0
+persist.cust.tel.eons=1
+persist.ril.ecclist=000,08,110,112,118,119,911,999
+persist.rild.autopinenabled=1
+media.stagefright.enable-player=false
+media.stagefright.enable-meta=false
+media.stagefright.enable-scan=false
+media.stagefright.enable-http=false
+ro.com.google.gmsversion=2.2_r7
+ro.com.google.clientidbase=android-acer
+keyguard.no_require_sim=1
+ro.config.ringtone=Ring_Synth_02.ogg
+ro.config.notification_sound=F1_New_SMS.ogg
+ro.config.alarm_alert=Alarm_Classic.ogg
+
