@@ -23,7 +23,8 @@
 #$(call inherit-product, device/qcom/qsd8250_ffa/qsd8250_ffa.mk)
 
 PRODUCT_COPY_FILES := \
-	device/acer/a1/init.salsa.rc:root/init.salsa.rc
+	device/acer/a1/init.salsa.rc:root/init.salsa.rc \
+	device/acer/a1/init.rc:root/init.rc \
 
 PRODUCT_PACKAGES := \
 	Email \
