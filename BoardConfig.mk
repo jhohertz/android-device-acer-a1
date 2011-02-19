@@ -62,6 +62,6 @@ TARGET_USES_2G_VM_SPLIT := true
 BOARD_KERNEL_BASE := 0x20000000
 BOARD_NAND_PAGE_SIZE := 4096
 
-BOARD_KERNEL_CMDLINE := console=null androidboot.hardware=salsa
+BOARD_KERNEL_CMDLINE := console=null androidboot.hardware=salsa hw_ver=6
 BOARD_EGL_CFG := device/acer/a1/egl.cfg
 
