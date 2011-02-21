@@ -44,7 +44,6 @@ adb pull /system/etc/bootsound.wav ../../../vendor/acer/$DEVICE/proprietary/boot
 adb pull /system/etc/loc_parameter.ini ../../../vendor/acer/$DEVICE/proprietary/loc_parameter.ini
 
 # libraries
-adb pull /system/lib/libaudio.so ../../../vendor/acer/$DEVICE/proprietary/libaudio.so
 adb pull /system/lib/libauth.so ../../../vendor/acer/$DEVICE/proprietary/libauth.so
 adb pull /system/lib/libcamera.so ../../../vendor/acer/$DEVICE/proprietary/libcamera.so
 adb pull /system/lib/libcm.so ../../../vendor/acer/$DEVICE/proprietary/libcm.so
@@ -72,12 +71,14 @@ adb pull /system/lib/libpdsm_atl.so ../../../vendor/acer/$DEVICE/proprietary/lib
 adb pull /system/lib/libping_mdm.so ../../../vendor/acer/$DEVICE/proprietary/libping_mdm.so
 adb pull /system/lib/libqmi.so ../../../vendor/acer/$DEVICE/proprietary/libqmi.so
 adb pull /system/lib/libril-acer-1.so ../../../vendor/acer/$DEVICE/proprietary/libril-acer-1.so
+adb pull /system/lib/libril-acerril-hook-oem.so ../../../vendor/acer/$DEVICE/proprietary/libril-acerril-hook-oem.so
+adb pull /system/lib/libqueue.so ../../../vendor/acer/$DEVICE/proprietary/libqueue.so
 adb pull /system/lib/libuim.so ../../../vendor/acer/$DEVICE/proprietary/libuim.so
 adb pull /system/lib/libwms.so ../../../vendor/acer/$DEVICE/proprietary/libwms.so
 adb pull /system/lib/libwmsts.so ../../../vendor/acer/$DEVICE/proprietary/libwmsts.so
 
 # all other libraries
-db pull /system/lib/libAtiSoftDict.so ../../../vendor/acer/$DEVICE/proprietary/libAtiSoftDict.so
+adb pull /system/lib/libAtiSoftDict.so ../../../vendor/acer/$DEVICE/proprietary/libAtiSoftDict.so
 adb pull /system/lib/libatu.so ../../../vendor/acer/$DEVICE/proprietary/libatu.so
 adb pull /system/lib/libcommondefs.so ../../../vendor/acer/$DEVICE/proprietary/libcommondefs.so
 adb pull /system/lib/libdiag.so ../../../vendor/acer/$DEVICE/proprietary/libdiag.so
@@ -101,8 +102,6 @@ adb pull /system/lib/libOmxMp3Dec.so ../../../vendor/acer/$DEVICE/proprietary/li
 adb pull /system/lib/libOmxQcelp13Enc.so ../../../vendor/acer/$DEVICE/proprietary/libOmxQcelp13Enc.so
 adb pull /system/lib/libOmxVdec.so ../../../vendor/acer/$DEVICE/proprietary/libOmxVdec.so
 adb pull /system/lib/libOmxVidEnc.so ../../../vendor/acer/$DEVICE/proprietary/libOmxVidEnc.so
-adb pull /system/lib/libqueue.so ../../../vendor/acer/$DEVICE/proprietary/libqueue.so
-adb pull /system/lib/libril-acerril-hook-oem.so ../../../vendor/acer/$DEVICE/proprietary/libril-acerril-hook-oem.so
 adb pull /system/lib/librs_jni.so ../../../vendor/acer/$DEVICE/proprietary/librs_jni.so
 adb pull /system/lib/libRS.so ../../../vendor/acer/$DEVICE/proprietary/libRS.so
 adb pull /system/lib/libusbconn.so ../../../vendor/acer/$DEVICE/proprietary/libusbconn.so
@@ -152,6 +151,8 @@ adb pull /system/bin/sensorserver_yamaha ../../../vendor/acer/$DEVICE/proprietar
 chmod 0755 ../../../vendor/acer/$DEVICE/proprietary/sensorserver_yamaha
 adb pull /system/bin/sensorstatutil_yamaha ../../../vendor/acer/$DEVICE/proprietary/sensorstatutil_yamaha
 chmod 0755 ../../../vendor/acer/$DEVICE/proprietary/sensorstatutil_yamaha
+adb pull /system/bin/get_prox_light_calib ../../../vendor/acer/a1/proprietary/get_prox_light_calib
+chmod 0755 ../../../vendor/acer/$DEVICE/proprietary/get_prox_light_calib
 
 # yamaha sensor
 adb pull /system/lib/libsensor_yamaha.so ../../../vendor/acer/$DEVICE/proprietary/libsensor_yamaha.so
@@ -206,7 +207,6 @@ PRODUCT_COPY_FILES += \\
 
 # libraries
 PRODUCT_COPY_FILES += \\
-    vendor/acer/__DEVICE__/proprietary/libaudio.so:/system/lib/libaudio.so \\
     vendor/acer/__DEVICE__/proprietary/libauth.so:/system/lib/libauth.so \\
     vendor/acer/__DEVICE__/proprietary/libcm.so:/system/lib/libcm.so \\
     vendor/acer/__DEVICE__/proprietary/libcamera.so:/system/lib/libcamera.so \\
@@ -235,6 +235,8 @@ PRODUCT_COPY_FILES += \\
     vendor/acer/__DEVICE__/proprietary/libping_mdm.so:/system/lib/libping_mdm.so \\
     vendor/acer/__DEVICE__/proprietary/libqmi.so:/system/lib/libqmi.so \\
     vendor/acer/__DEVICE__/proprietary/libril-acer-1.so:/system/lib/libril-acer-1.so \\
+    vendor/acer/__DEVICE__/proprietary/libril-acerril-hook-oem.so:/system/lib/libril-acerril-hook-oem.so \\
+    vendor/acer/__DEVICE__/proprietary/libqueue.so:/system/lib/libqueue.so \\
     vendor/acer/__DEVICE__/proprietary/libsensor_yamaha.so:/system/lib/libsensor_yamaha.so \\
     vendor/acer/__DEVICE__/proprietary/libuim.so:/system/lib/libuim.so \\
     vendor/acer/__DEVICE__/proprietary/libwms.so:/system/lib/libwms.so \\
@@ -267,8 +269,6 @@ PRODUCT_COPY_FILES += \\
     vendor/acer/__DEVICE__/proprietary/libusbconn.so:/system/lib/libusbconn.so \\
     vendor/acer/__DEVICE__/proprietary/libRS.so:/system/lib/libRS.so \\
     vendor/acer/__DEVICE__/proprietary/librs_jni.so:/system/lib/librs_jni.so \\
-    vendor/acer/__DEVICE__/proprietary/libril-acerril-hook-oem.so:/system/lib/libril-acerril-hook-oem.so \\
-    vendor/acer/__DEVICE__/proprietary/libqueue.so:/system/lib/libqueue.so \\
     vendor/acer/__DEVICE__/proprietary/libOmxVidEnc.so:/system/lib/libOmxVidEnc.so \\
     vendor/acer/__DEVICE__/proprietary/libOmxVdec.so:/system/lib/libOmxVdec.so \\
     vendor/acer/__DEVICE__/proprietary/libOmxQcelp13Enc.so:/system/lib/libOmxQcelp13Enc.so \\
