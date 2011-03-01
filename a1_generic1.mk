@@ -25,6 +25,7 @@
 PRODUCT_COPY_FILES := \
 	device/acer/a1/init.salsa.rc:root/init.salsa.rc \
 	device/acer/a1/init.rc:root/init.rc \
+	device/acer/a1/dhcpcd.conf:system/etc/dhcpcd/dhcpcd.conf \
 
 PRODUCT_PACKAGES := \
 	Email \

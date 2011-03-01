@@ -76,6 +76,7 @@ adb pull /system/lib/libqueue.so ../../../vendor/acer/$DEVICE/proprietary/libque
 adb pull /system/lib/libuim.so ../../../vendor/acer/$DEVICE/proprietary/libuim.so
 adb pull /system/lib/libwms.so ../../../vendor/acer/$DEVICE/proprietary/libwms.so
 adb pull /system/lib/libwmsts.so ../../../vendor/acer/$DEVICE/proprietary/libwmsts.so
+adb pull /system/lib/libbluedroid.so ../../../vendor/acer/$DEVICE/proprietary/libbluedroid.so
 
 # all other libraries
 adb pull /system/lib/libAtiSoftDict.so ../../../vendor/acer/$DEVICE/proprietary/libAtiSoftDict.so
@@ -90,7 +91,6 @@ adb pull /system/lib/libfuse.so ../../../vendor/acer/$DEVICE/proprietary/libfuse
 adb pull /system/lib/libHDMIsetting.so ../../../vendor/acer/$DEVICE/proprietary/libHDMIsetting.so
 adb pull /system/lib/libjni_acerAgpsSetting.so ../../../vendor/acer/$DEVICE/proprietary/libjni_acerAgpsSetting.so
 adb pull /system/lib/libjni_AcerNativeMethod.so ../../../vendor/acer/$DEVICE/proprietary/libjni_AcerNativeMethod.so
-adb pull /system/lib/libjni_xt9input.so ../../../vendor/acer/$DEVICE/proprietary/libjni_xt9input.so
 adb pull /system/lib/libmm-abl.so ../../../vendor/acer/$DEVICE/proprietary/libmm-abl.so
 adb pull /system/lib/libmmipl.so ../../../vendor/acer/$DEVICE/proprietary/libmmipl.so
 adb pull /system/lib/libnemoPlayer_hdmi_jni.so ../../../vendor/acer/$DEVICE/proprietary/libnemoPlayer_hdmi_jni.so
@@ -125,7 +125,6 @@ adb pull /system/lib/libvoSrcRTSP.so ../../../vendor/acer/$DEVICE/proprietary/li
 adb pull /system/lib/libvoVidDec.so ../../../vendor/acer/$DEVICE/proprietary/libvoVidDec.so
 adb pull /system/lib/libvoWMADec.so ../../../vendor/acer/$DEVICE/proprietary/libvoWMADec.so
 adb pull /system/lib/libvoWMVDec.so ../../../vendor/acer/$DEVICE/proprietary/libvoWMVDec.so
-adb pull /system/lib/libxt9core.so ../../../vendor/acer/$DEVICE/proprietary/libxt9core.so
 adb pull /system/lib/libysshared.so ../../../vendor/acer/$DEVICE/proprietary/libysshared.so
 
 # 3D
@@ -161,6 +160,15 @@ adb pull /system/lib/libms3c_yamaha.so ../../../vendor/acer/$DEVICE/proprietary/
 # hw
 adb pull /system/lib/hw/lights.qsd8k.so ../../../vendor/acer/$DEVICE/proprietary/lights.qsd8k.so
 adb pull /system/lib/hw/sensors.salsa.so ../../../vendor/acer/$DEVICE/proprietary/sensors.salsa.so
+
+# something that will need to be replaced
+adb pull /system/bin/wpa_supplicant ../../../vendor/acer/$DEVICE/proprietary/wpa_supplicant
+chmod 0755 ../../../vendor/acer/$DEVICE/proprietary/wpa_supplicant
+adb pull /system/bin/dhcpcd ../../../vendor/acer/$DEVICE/proprietary/dhcpcd
+chmod 0755 ../../../vendor/acer/$DEVICE/proprietary/dhcpcd
+adb pull /system/lib/libhardware_legacy.so ../../../vendor/acer/$DEVICE/proprietary/libhardware_legacy.so
+adb pull /system/bin/netd ../../../vendor/acer/$DEVICE/proprietary/netd
+chmod 0755 ../../../vendor/acer/$DEVICE/proprietary/netd
 
 (cat << EOF) | sed s/__DEVICE__/$DEVICE/g > ../../../vendor/acer/$DEVICE/$DEVICE-vendor.mk
 # Copyright (C) 2010 The Android Open Source Project
@@ -241,10 +249,11 @@ PRODUCT_COPY_FILES += \\
     vendor/acer/__DEVICE__/proprietary/libuim.so:/system/lib/libuim.so \\
     vendor/acer/__DEVICE__/proprietary/libwms.so:/system/lib/libwms.so \\
     vendor/acer/__DEVICE__/proprietary/libwmsts.so:/system/lib/libwmsts.so \\
+    vendor/acer/__DEVICE__/proprietary/libbluedroid.so:/system/lib/libbluedroid.so \\
 
 # additional libraries
+PRODUCT_COPY_FILES += \\
     vendor/acer/__DEVICE__/proprietary/libysshared.so:/system/lib/libysshared.so \\
-    vendor/acer/__DEVICE__/proprietary/libxt9core.so:/system/lib/libxt9core.so \\
     vendor/acer/__DEVICE__/proprietary/libvoWMVDec.so:/system/lib/libvoWMVDec.so \\
     vendor/acer/__DEVICE__/proprietary/libvoWMADec.so:/system/lib/libvoWMADec.so \\
     vendor/acer/__DEVICE__/proprietary/libvoVidDec.so:/system/lib/libvoVidDec.so \\
@@ -280,7 +289,6 @@ PRODUCT_COPY_FILES += \\
     vendor/acer/__DEVICE__/proprietary/libnemoPlayer_hdmi_jni.so:/system/lib/libnemoPlayer_hdmi_jni.so \\
     vendor/acer/__DEVICE__/proprietary/libmmipl.so:/system/lib/libmmipl.so \\
     vendor/acer/__DEVICE__/proprietary/libmm-abl.so:/system/lib/libmm-abl.so \\
-    vendor/acer/__DEVICE__/proprietary/libjni_xt9input.so:/system/lib/libjni_xt9input.so \\
     vendor/acer/__DEVICE__/proprietary/libjni_AcerNativeMethod.so:/system/lib/libjni_AcerNativeMethod.so \\
     vendor/acer/__DEVICE__/proprietary/libjni_acerAgpsSetting.so:/system/lib/libjni_acerAgpsSetting.so \\
     vendor/acer/__DEVICE__/proprietary/libHDMIsetting.so:/system/lib/libHDMIsetting.so \\
@@ -312,11 +320,19 @@ PRODUCT_COPY_FILES += \\
     vendor/acer/__DEVICE__/proprietary/sensorstatutil_yamaha:/system/bin/sensorstatutil_yamaha \\
     vendor/acer/__DEVICE__/proprietary/sensorserver_yamaha:/system/bin/sensorserver_yamaha \\
     vendor/acer/__DEVICE__/proprietary/sensorcalibutil_yamaha:/system/bin/sensorcalibutil_yamaha \\
+    vendor/acer/__DEVICE__/proprietary/brcm_patchram_plus:/system/bin/brcm_patchram_plus \\
 
 # hw
 PRODUCT_COPY_FILES += \\
     vendor/acer/__DEVICE__/proprietary/lights.qsd8k.so:/system/lib/hw/lights.qsd8k.so \\
     vendor/acer/__DEVICE__/proprietary/sensors.salsa.so:/system/lib/hw/sensors.salsa.so \\
+
+# something that will need to be replaced
+PRODUCT_COPY_FILES += \\
+    vendor/acer/__DEVICE__/proprietary/wpa_supplicant:/system/bin/wpa_supplicant \\
+    vendor/acer/__DEVICE__/proprietary/dhcpcd:/system/bin/dhcpcd \\
+    vendor/acer/__DEVICE__/proprietary/libhardware_legacy.so:/system/lib/libhardware_legacy.so \\
+    vendor/acer/__DEVICE__/proprietary/netd:/system/bin/netd
 
 DEVICE_PACKAGE_OVERLAYS := vendor/acer/__DEVICE__/overlay
 
