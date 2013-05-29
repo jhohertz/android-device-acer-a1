@@ -35,7 +35,8 @@ PRODUCT_PACKAGES := \
 	LiveWallpapers \
 	LiveWallpapersPicker \
 	MagicSmokeWallpapers \
-	VisualizationWallpapers
+	VisualizationWallpapers \
+	lights.salsa \
 
 PRODUCT_COPY_FILES += \
 	device/acer/a1/apns-conf.xml:system/etc/apns-conf.xml \

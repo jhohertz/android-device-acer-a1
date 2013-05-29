@@ -37,9 +37,10 @@ WIFI_DRIVER_MODULE_PATH := "/system/etc/wifi/dhd.ko"
 WIFI_DRIVER_FW_STA_PATH := "/system/etc/wifi/BCM4325.bin"
 WIFI_DRIVER_MODULE_ARG := "firmware_path=/system/etc/wifi/BCM4325.bin nvram_path=/system/etc/wifi/nvram.txt"
 WIFI_DRIVER_MODULE_NAME := "dhd"
+WIFI_SDIO_IF_DRIVER_MODULE_ARG := ""
 
 TARGET_NO_BOOTLOADER := true
-TARGET_NO_KERNEL := false
+TARGET_NO_KERNEL := true
 TARGET_NO_RADIOIMAGE := true
 
 TARGET_GLOBAL_CFLAGS += -mfpu=neon -mfloat-abi=softfp
