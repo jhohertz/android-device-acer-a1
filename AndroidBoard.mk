@@ -19,7 +19,7 @@ LOCAL_PATH := $(call my-dir)
 # Compile Linux Kernel
 #----------------------------------------------------------------------
 ifeq ($(KERNEL_DEFCONFIG),)
-	KERNEL_DEFCONFIG := acer-q8k-a1-dvt_defconfig
+	KERNEL_DEFCONFIG := salsa_defconfig
 endif
 
 include kernel/AndroidKernel.mk
