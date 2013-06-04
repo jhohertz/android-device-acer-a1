@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#define LOG_NDEBUG 0
 #define LOG_TAG "acer_acoustic"
 
 #include <cutils/log.h>
@@ -55,7 +56,7 @@ static struct {
     { "TPA2018_MODE_VOICE_CALL",  TPA2018_MODE_VOICE_CALL},
 };
 
-static int parse_tpa2018_parameters(unsigned char *config, FILE *fh)
+static int parse_tpa2018d1_parameters(unsigned char *config, FILE *fh)
 {
     /*
      * Find new line, read from current offset to newline
@@ -111,9 +112,9 @@ static int parse_tpa2018_parameters(unsigned char *config, FILE *fh)
     return (parsed_count > 0 ? 0 : 1);
 }
 
-static int write_tpa2018_parameters(unsigned char *config)
+static int write_tpa2018d1_parameters(unsigned char *config)
 {
-    int fd, res;
+    int fd, res = 0;
     struct tpa2018d1_config_data cdata;
 
     cdata.cmd_data = config;
@@ -135,16 +136,17 @@ static int write_tpa2018_parameters(unsigned char *config)
 	goto out;
     }
 
-    return 0;
 out:
+    if (fd > -1) {
+	close(fd);
+    }
     return -res;
 }
 
-int set_tpa2018_parameters(void)
+int set_tpa2018d1_parameters(void)
 {
     int res;
     FILE *fh = NULL;
-
     unsigned char *tpa2018_config = NULL;
 
     fh = fopen(TPA2018_CSV_PATH, "r");
@@ -157,17 +159,19 @@ int set_tpa2018_parameters(void)
 
     tpa2018_config = calloc(TPA2018_NUM_MODES, TPA2018_CMD_LEN);
 
-    if (parse_tpa2018_parameters(tpa2018_config, fh)) {
-	LOGE("parse_tpa2018_parameters failed\n");
+    if (parse_tpa2018d1_parameters(tpa2018_config, fh)) {
+	LOGE("parse_tpa2018d1_parameters failed\n");
 	res = -1;
 	goto out;
     }
 
-    if (write_tpa2018_parameters(tpa2018_config)) {
-	LOGE("write_tpa2018_parameters failed\n");
+    if (write_tpa2018d1_parameters(tpa2018_config)) {
+	LOGE("write_tpa2018d1_parameters failed\n");
 	res = -1;
 	goto out;
     }
+
+    LOGI("TPA2018 parameters set\n");
 
     res = 0;
 
@@ -179,10 +183,4 @@ out:
 	fclose(fh);
 
     return res;
-}
-
-/* Hardware volume setting */
-int set_tpa2018_fixed_gain(int value)
-{
-    return 0;
 }
