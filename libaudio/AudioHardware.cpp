@@ -517,7 +517,13 @@ static status_t do_route_audio_dev_ctrl(uint32_t device, bool inCall)
 
     if (device == SND_DEVICE_HANDSET) {
            out_device[0] = HANDSET_SPKR;
-           mic_device[0] = HANDSET_MIC;
+           // Route from handset when in call but assume speakerphone when
+           // not in call for various recording SW
+           if (inCall) {
+               mic_device[0] = HANDSET_MIC;
+           } else {
+               mic_device[0] = SPKR_PHONE_MIC;
+           }
            LOGD("Handset");
     } else if ((device  == SND_DEVICE_BT) || (device == SND_DEVICE_BT_EC_OFF)) {
            out_device[0] = BT_SCO_SPKR;
