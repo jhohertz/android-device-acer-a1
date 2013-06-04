@@ -466,9 +466,11 @@ status_t AudioHardware::setVoiceVolume(float v)
         return NO_ERROR;
     }
 
-    if (v < 0.0) {
-        LOGW("setVoiceVolume(%f) under 0.0, assuming 0.0\n", v);
-        v = 0.0;
+    // The UI does not allow setting 0 volume for the calls on the
+    // speakerphone. 0.2 is volume level 1
+    if (v < 0.2) {
+        LOGW("setVoiceVolume(%f) under 0.2, assuming 0.2\n", v);
+        v = 0.2;
     } else if (v > 1.0) {
         LOGW("setVoiceVolume(%f) over 1.0, assuming 1.0\n", v);
         v = 1.0;
@@ -476,7 +478,7 @@ status_t AudioHardware::setVoiceVolume(float v)
 
     int vol = lrint(v * VOICE_VOLUME_MAX);
     LOGD("setVoiceVolume(%f)\n", v);
-    LOGI("Setting in-call volume to %d (available range is 0 to %d)\n", vol, VOICE_VOLUME_MAX);
+    LOGI("Setting in-call volume to %d (available range is 1 to %d)\n", vol, VOICE_VOLUME_MAX);
 
     Mutex::Autolock lock(mLock);
     set_volume_rpc(vol); //always set current device
