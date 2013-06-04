@@ -516,8 +516,8 @@ static status_t do_route_audio_dev_ctrl(uint32_t device, bool inCall)
     LOGD("Switching audio device to ");
 
     if (device == SND_DEVICE_HANDSET) {
-           out_device[0] = SPKR_PHONE_MONO;
-           mic_device[0] = SPKR_PHONE_MIC;
+           out_device[0] = HANDSET_SPKR;
+           mic_device[0] = HANDSET_MIC;
            LOGD("Handset");
     } else if ((device  == SND_DEVICE_BT) || (device == SND_DEVICE_BT_EC_OFF)) {
            out_device[0] = BT_SCO_SPKR;
