@@ -38,6 +38,8 @@ PRODUCT_PACKAGES := \
 	VisualizationWallpapers \
 	lights.salsa \
 	acer_acoustic \
+	libaudio \
+	libaudiopolicy \
 
 PRODUCT_COPY_FILES += \
 	device/acer/a1/apns-conf.xml:system/etc/apns-conf.xml \

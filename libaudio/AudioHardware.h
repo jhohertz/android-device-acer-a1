@@ -66,24 +66,27 @@ namespace android {
 #define ADSP_AUDIO_DEVICE_ID_TTY_HEADSET_SPKR			0x108151c
 #define ADSP_AUDIO_DEVICE_ID_I2S_SPKR				0x1089bf4
 
-#define HANDSET_MIC                ADSP_AUDIO_DEVICE_ID_HANDSET_MIC
-#define HANDSET_SPKR               ADSP_AUDIO_DEVICE_ID_HANDSET_SPKR
-#define HEADSET_MIC                ADSP_AUDIO_DEVICE_ID_HEADSET_MIC
-#define HEADSET_SPKR_MONO          ADSP_AUDIO_DEVICE_ID_HEADSET_SPKR_MONO
-#define HEADSET_SPKR_STEREO        ADSP_AUDIO_DEVICE_ID_HEADSET_SPKR_STEREO
-#define SPKR_PHONE_MIC             ADSP_AUDIO_DEVICE_ID_SPKR_PHONE_MIC
-#define SPKR_PHONE_MONO            ADSP_AUDIO_DEVICE_ID_SPKR_PHONE_MONO
-#define SPKR_PHONE_STEREO          ADSP_AUDIO_DEVICE_ID_SPKR_PHONE_STEREO
-#define BT_A2DP_SPKR               ADSP_AUDIO_DEVICE_ID_BT_A2DP_SPKR
-#define BT_SCO_MIC                 ADSP_AUDIO_DEVICE_ID_BT_SCO_MIC
-#define BT_SCO_SPKR                ADSP_AUDIO_DEVICE_ID_BT_SCO_SPKR
-#define TTY_HEADSET_MIC            ADSP_AUDIO_DEVICE_ID_TTY_HEADSET_MIC
-#define TTY_HEADSET_SPKR           ADSP_AUDIO_DEVICE_ID_TTY_HEADSET_SPKR
-#define FM_HEADSET                 ADSP_AUDIO_DEVICE_ID_HEADSET_SPKR_STEREO
-#define FM_SPKR	                   ADSP_AUDIO_DEVICE_ID_SPKR_PHONE_MONO
-#define SPKR_PHONE_HEADSET_STEREO  ADSP_AUDIO_DEVICE_ID_SPKR_PHONE_MONO_W_MONO_HEADSET
-#define HANDSET_DUALMIC            ADSP_AUDIO_DEVICE_ID_HANDSET_DUAL_MIC
-#define SPKR_DUALMIC               ADSP_AUDIO_DEVICE_ID_SPKR_PHONE_DUAL_MIC
+/*
+ * These shortcuts are used in AudioHardware.cpp, however they are also
+ * defined in msm_audio.h. We may want to drop them though.
+ */
+#undef SPKR_PHONE_MONO
+#define SPKR_PHONE_MONO		  ADSP_AUDIO_DEVICE_ID_SPKR_PHONE_MONO
+#undef SPKR_PHONE_MIC
+#define SPKR_PHONE_MIC		  ADSP_AUDIO_DEVICE_ID_SPKR_PHONE_MIC
+
+#undef HEADSET_SPKR_STEREO
+#define HEADSET_SPKR_STEREO	  ADSP_AUDIO_DEVICE_ID_HEADSET_SPKR_STEREO
+#undef HEADSET_MIC
+#define HEADSET_MIC		  ADSP_AUDIO_DEVICE_ID_HEADSET_MIC
+
+#undef SPKR_PHONE_HEADSET_STEREO
+#define SPKR_PHONE_HEADSET_STEREO ADSP_AUDIO_DEVICE_ID_SPKR_PHONE_MONO_W_MONO_HEADSET
+
+#undef HANDSET_SPKR
+#define HANDSET_SPKR		  ADSP_AUDIO_DEVICE_ID_HANDSET_SPKR
+#undef HANDSET_MIC
+#define HANDSET_MIC		  ADSP_AUDIO_DEVICE_ID_HANDSET_MIC
 
 #define ACDB_ID_EXT_MIC_REC 307
 #define ACDB_ID_HEADSET_PLAYBACK 407
@@ -225,6 +228,8 @@ private:
     status_t    get_mRoutes();
     status_t    set_mRecordState(bool onoff);
     status_t    get_snd_dev();
+    status_t    set_tpa2018_volume(float v);
+    status_t    do_tpa2018_control(int mode);
     status_t    doRouting(AudioStreamInMSM72xx *input);
     AudioStreamInMSM72xx*   getActiveInput_l();
     size_t      getBufferSize(uint32_t sampleRate, int channelCount);

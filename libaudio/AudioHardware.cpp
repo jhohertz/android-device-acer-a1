@@ -16,8 +16,8 @@
 
 #include <math.h>
 
-//#define LOG_NDEBUG 0
-#define LOG_TAG "AudioHardwareQSD"
+#define LOG_NDEBUG 0
+#define LOG_TAG "AudioHardwareSalsa"
 #include <utils/Log.h>
 #include <utils/String8.h>
 #include <hardware_legacy/power.h>
@@ -37,7 +37,10 @@
 #include "AudioHardware.h"
 #include <media/AudioRecord.h>
 
-#define DUALMIC_KEY "dualmic_enabled"
+extern "C" {
+#include <linux/tpa2018d1.h>
+}
+
 #define TTY_MODE_KEY "tty_mode"
 
 #define LOG_SND_RPC 0  // Set to 1 to log sound RPC's
@@ -73,6 +76,7 @@ static const uint32_t SND_DEVICE_HEADSET_AND_SPEAKER_BACK_MIC = 30;
 static uint32_t MIKE_ID_SPKR = 0x2B;
 static uint32_t MIKE_ID_HANDSET = 0x2C;
 namespace android {
+static int support_tpa2018d1 = true;
 static int old_pathid = -1;
 static int new_pathid = -1;
 static int curr_out_device[2] = {-1,-1};
@@ -82,6 +86,7 @@ static int fd_fm_device = -1;
 static int stream_volume = -300;
 
 int errCount = 0;
+static void * acoustic;
 const uint32_t AudioHardware::inputSamplingRates[] = {
         8000, 11025, 12000, 16000, 22050, 24000, 32000, 44100, 48000
 };
@@ -96,34 +101,42 @@ AudioHardware::AudioHardware() :
     mInit(false), mMicMute(true),
     mBluetoothNrec(true), mBluetoothIdTx(0),
     mBluetoothIdRx(0), mOutput(0),
-    mDualMicEnabled(false), mTtyMode(TTY_OFF),
+    mTtyMode(TTY_OFF),
     mVoiceVolume(VOICE_VOLUME_MAX)
 {
+    int (*set_tpa2018d1_parameters)();
+    int rc;
+
+    acoustic = ::dlopen("/system/lib/libacer_acoustic.so", RTLD_NOW);
+    LOGV("AudioHardware - after dlopen, acoustic=%p", acoustic);
+    if (acoustic == NULL) {
+        LOGE("Could not open libacer_acoustic.so");
+        goto tpa2018_finish;
+    }
+
+    set_tpa2018d1_parameters = (int (*)(void))::dlsym(acoustic, "set_tpa2018d1_parameters");
+    if ((*set_tpa2018d1_parameters) == 0) {
+        LOGW("set_tpa2018d1_parameters() not present");
+        support_tpa2018d1 = false;
+    }
+
+    if (support_tpa2018d1) {
+        rc = set_tpa2018d1_parameters();
+        if (rc < 0) {
+            support_tpa2018d1 = false;
+            LOGW("speaker amplifier tpa2018 is not supported");
+        }
+    }
+
+tpa2018_finish:
     // reset voice mode in case media_server crashed and restarted while in call
     int fd = open("/dev/msm_audio_ctl", O_RDWR);
     if (fd >= 0) {
         ioctl(fd, AUDIO_STOP_VOICE, NULL);
         close(fd);
     }
+
     mInit = true;
-    static const char *const path = "/system/etc/DualMicControl.txt";
-    FILE *fp;
-    fp = fopen(path, "r");
-    if (fp == NULL) {
-         LOGE("failed to open DualMicControl %s: %s (%d)",
-               path, strerror(errno), errno);
-    }
-    else {
-         if(fgetc(fp) == '0'){
-            MIKE_ID_HANDSET = CAD_HW_DEVICE_ID_HANDSET_DUAL_MIC_BROADSIDE;
-            MIKE_ID_SPKR = CAD_HW_DEVICE_ID_SPKR_PHONE_DUAL_MIC_BROADSIDE;
-         }
-         else{
-             MIKE_ID_HANDSET = CAD_HW_DEVICE_ID_HANDSET_DUAL_MIC_ENDFIRE;
-             MIKE_ID_SPKR = CAD_HW_DEVICE_ID_SPKR_PHONE_DUAL_MIC_ENDFIRE;
-         }
-        fclose(fp);
-    }
 }
 AudioHardware::~AudioHardware()
 {
@@ -241,7 +254,10 @@ static status_t set_volume_rpc(uint32_t volume)
 
 status_t AudioHardware::setMode(int mode)
 {
-   int prevMode = mMode;
+    if (support_tpa2018d1)
+        do_tpa2018_control(mode);
+
+    int prevMode = mMode;
     status_t status = AudioHardwareBase::setMode(mode);
     if (status == NO_ERROR) {
         // make sure that doAudioRouteOrMute() is called by doRouting()
@@ -358,18 +374,6 @@ status_t AudioHardware::setParameters(const String8& keyValuePairs)
         doRouting(NULL);
     }
 
-    key = String8(DUALMIC_KEY);
-    if (param.get(key, value) == NO_ERROR) {
-        if (value == "true") {
-            mDualMicEnabled = true;
-            LOGI("DualMike feature Enabled");
-        } else {
-            mDualMicEnabled = false;
-            LOGI("DualMike feature Disabled");
-        }
-        doRouting(NULL);
-    }
-
     key = String8(TTY_MODE_KEY);
     if (param.get(key, value) == NO_ERROR) {
         if (value == "full") {
@@ -394,13 +398,6 @@ String8 AudioHardware::getParameters(const String8& keys)
 {
     AudioParameter request = AudioParameter(keys);
     AudioParameter reply = AudioParameter();
-    String8 value;
-    String8 key = String8(DUALMIC_KEY);
-
-    if (request.get(key, value) == NO_ERROR) {
-        value = String8(mDualMicEnabled ? "true" : "false");
-        reply.add(key, value);
-    }
 
     LOGV("getParameters() %s", keys.string());
 
@@ -489,11 +486,21 @@ status_t AudioHardware::setVoiceVolume(float v)
 
 status_t AudioHardware::setMasterVolume(float v)
 {
+    int rc;
+
     LOGI("Set master volume to %f.\n", v);
-    // We return an error code here to let the audioflinger do in-software
-    // volume on top of the maximum volume that we set through the SND API.
-    // return error - software mixer will handle it
-    return -1;
+    if (support_tpa2018d1) {
+        rc = set_tpa2018_volume(v);
+    } else {
+        rc = -1;
+    }
+
+    LOGV("%s: v=%f, rc=%d", __func__, v, rc);
+
+    // The framework sets 1.0 volume so it does not like this is used ATM.
+    // In case set_tpa2018_volume indeed fails the return code of -1 will
+    // force the software volume control.
+    return rc;
 }
 
 static status_t do_route_audio_dev_ctrl(uint32_t device, bool inCall)
@@ -501,19 +508,16 @@ static status_t do_route_audio_dev_ctrl(uint32_t device, bool inCall)
     uint32_t out_device[2] = {0,0}, mic_device[2] = {0,0};
     int fd = 0;
 
+    LOGV("do_route_audio_dev_ctrl(device=%d, inCall=%d)", device, inCall);
+
     if (device == SND_DEVICE_CURRENT)
         goto Incall;
     // hack -- kernel needs to put these in include file
     LOGD("Switching audio device to ");
+
     if (device == SND_DEVICE_HANDSET) {
-           char value[PROPERTY_VALUE_MAX];
-           property_get("ro.product.device",value,"0");
-           if (strcmp("qsd8650a_st1x",value) == 0)
-           {
-                 out_device[0] = SPKR_PHONE_MONO;
-           } else
-                out_device[0] = HANDSET_SPKR;
-                mic_device[0] = HANDSET_MIC;
+           out_device[0] = SPKR_PHONE_MONO;
+           mic_device[0] = SPKR_PHONE_MIC;
            LOGD("Handset");
     } else if ((device  == SND_DEVICE_BT) || (device == SND_DEVICE_BT_EC_OFF)) {
            out_device[0] = BT_SCO_SPKR;
@@ -532,30 +536,10 @@ static status_t do_route_audio_dev_ctrl(uint32_t device, bool inCall)
            out_device[0] = SPKR_PHONE_HEADSET_STEREO;
            mic_device[0] = HEADSET_MIC;
            LOGD("Stereo Headset + Speaker");
-    } else if (device == SND_DEVICE_HEADSET_AND_SPEAKER_BACK_MIC) {
-           out_device[0] = SPKR_PHONE_HEADSET_STEREO;
-           mic_device[0] = SPKR_PHONE_MIC;
-           LOGD("Stereo Headset + Speaker and back mic");
     } else if (device == SND_DEVICE_NO_MIC_HEADSET) {
            out_device[0] = HEADSET_SPKR_STEREO;
            mic_device[0] = HANDSET_MIC;
            LOGD("No microphone Wired Headset");
-    } else if (device == SND_DEVICE_NO_MIC_HEADSET_BACK_MIC) {
-           out_device[0] = HEADSET_SPKR_STEREO;
-           mic_device[0] = SPKR_PHONE_MIC;
-           LOGD("No microphone Wired Headset and back mic");
-    } else if (device == SND_DEVICE_HANDSET_BACK_MIC) {
-           out_device[0] = HANDSET_SPKR;
-           mic_device[0] = SPKR_PHONE_MIC;
-           LOGD("Handset and back mic");
-    } else if (device == SND_DEVICE_FM_HEADSET) {
-           out_device[0] = FM_HEADSET;
-           mic_device[0] = HEADSET_MIC;
-           LOGD("Stereo FM headset");
-    } else if (device == SND_DEVICE_FM_SPEAKER) {
-           out_device[0] = FM_SPKR;
-           mic_device[0] = HEADSET_MIC;
-           LOGD("Stereo FM speaker");
     } else if (device == SND_DEVICE_TTY_FULL) {
            out_device[0] = TTY_HEADSET_SPKR;
            mic_device[0] = TTY_HEADSET_MIC;
@@ -568,16 +552,6 @@ static status_t do_route_audio_dev_ctrl(uint32_t device, bool inCall)
            out_device[0] = HANDSET_SPKR;
            mic_device[0] = TTY_HEADSET_MIC;
            LOGD("TTY headset in HCO mode\n");
-    } else if (device == SND_DEVICE_HANDSET_DUAL_MIC) {
-           out_device[0] = HANDSET_SPKR;
-           mic_device[0] = HANDSET_DUALMIC;
-           mic_device[1] = MIKE_ID_HANDSET;
-           LOGD("Handset with DualMike");
-    } else if (device == SND_DEVICE_SPEAKER_DUAL_MIC) {
-           out_device[0] = SPKR_PHONE_MONO;
-           mic_device[0] = SPKR_DUALMIC;
-           mic_device[1] = MIKE_ID_SPKR;
-           LOGD("Speakerphone with DualMike");
     } else if (device == SND_DEVICE_CARKIT) {
            out_device[0] = BT_SCO_SPKR;
            mic_device[0] = BT_SCO_MIC;
@@ -681,6 +655,121 @@ status_t AudioHardware::get_snd_dev(void)
     return mCurSndDevice;
 }
 
+status_t AudioHardware::set_tpa2018_volume(float v)
+{
+    /*
+     * TPA2018 sets gain as -28dB to 30dB and the IOCTL expects the value in
+     * two's compliment.
+     * 0.0 = -28dB
+     * 1.0 = 30dB
+     */
+    unsigned char current_config[7];
+    unsigned char config[8] = { 0x1 };
+    unsigned char fixed_gain;
+    int fd;
+    int rc = 0;
+    int tmp_value;
+    int retry = 3;
+
+    tmp_value = (2.0 * v * 580.0 + 10) / 20 - 28;
+    /* get two's compliment and clear first 2 bits */
+    if (tmp_value < 0) {
+        fixed_gain = (~tmp_value + 1) & 0x3f;
+    } else {
+        fixed_gain = tmp_value;
+    }
+
+    fd = open("/dev/tpa2018d1", O_RDWR);
+    if (fd < 0) {
+        LOGE("can't open /dev/tpa2018d1: %s", strerror(errno));
+        return -1;
+    }
+
+    do {
+        rc = ioctl(fd, TPA2018_READ_CONFIG, &current_config);
+        if (!rc)
+            break;
+    } while (--retry);
+
+    if (rc != 0) {
+        LOGE("ioctl TPA2018_READ_CONFIG failed: %s", strerror(errno));
+        rc = -1;
+        goto out;
+    }
+
+    memcpy(config + 1, current_config, 7);
+
+    /* AGC Fixed Gain Control, Address: 5 */
+    config[5] = fixed_gain;
+
+    retry = 3;
+    do {
+        rc = ioctl(fd, TPA2018_SET_CONFIG, &config);
+        if (!rc)
+            break;
+    } while (--retry);
+
+    if (rc != 0) {
+        LOGE("ioctl TPA2018_SET_CONFIG failed: %s", strerror(errno));
+        rc = -1;
+        goto out;
+    }
+
+    LOGV("set volume = %f (gain = %d dB)", v, tmp_value);
+out:
+    close(fd);
+    return rc;
+}
+
+status_t AudioHardware::do_tpa2018_control(int mode)
+{
+
+    if (curr_out_device[0] == SPKR_PHONE_MONO ||
+        curr_out_device[0] == HEADSET_SPKR_STEREO ||
+        curr_out_device[0] == SPKR_PHONE_HEADSET_STEREO) {
+
+        int rc;
+        int fd;
+        int retry = 3;
+
+        switch (mode) {
+            case AudioSystem::MODE_NORMAL:
+                mode = TPA2018_MODE_PLAYBACK;
+                break;
+            case AudioSystem::MODE_RINGTONE:
+                mode = TPA2018_MODE_RINGTONE;
+                break;
+            case AudioSystem::MODE_IN_CALL:
+                mode = TPA2018_MODE_VOICE_CALL;
+                break;
+            default:
+                return 0;
+        }
+
+        fd = open("/dev/tpa2018d1", O_RDWR);
+        if (fd < 0) {
+            LOGE("do_tpa2018_control: can't open /dev/tpa2018d1: %s", strerror(errno));
+            return -1;
+        }
+
+        do {
+            rc = ioctl(fd, TPA2018_SET_MODE, &mode);
+            if (!rc)
+                break;
+        } while (--retry);
+
+        if (rc < 0) {
+            LOGE("ioctl TPA2018_SET_MODE failed: %s", strerror(errno));
+        } else {
+            LOGV("do_tpa2018_control: ioctl TPA2018_SET_MODE %d ok", mode);
+        }
+
+        close(fd);
+    }
+    return 0;
+}
+
+
 status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input)
 {
     Mutex::Autolock lock(mLock);
@@ -783,16 +872,6 @@ status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input)
         } else {
             LOGI("Routing audio to Handset\n");
             sndDevice = SND_DEVICE_HANDSET;
-        }
-    }
-
-    if (mDualMicEnabled && mMode == AudioSystem::MODE_IN_CALL) {
-        if (sndDevice == SND_DEVICE_HANDSET) {
-            LOGI("Routing audio to handset with DualMike enabled\n");
-            sndDevice = SND_DEVICE_HANDSET_DUAL_MIC;
-        } else if (sndDevice == SND_DEVICE_SPEAKER) {
-            LOGI("Routing audio to speakerphone with DualMike enabled\n");
-            sndDevice = SND_DEVICE_SPEAKER_DUAL_MIC;
         }
     }
 
