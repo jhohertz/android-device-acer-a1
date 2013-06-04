@@ -86,7 +86,6 @@ adb pull /system/lib/libdiag.so ../../../vendor/acer/$DEVICE/proprietary/libdiag
 adb pull /system/lib/libDxAndroidSpecific.so ../../../vendor/acer/$DEVICE/proprietary/libDxAndroidSpecific.so
 adb pull /system/lib/libDxDrmJava.so ../../../vendor/acer/$DEVICE/proprietary/libDxDrmJava.so
 adb pull /system/lib/libDxWBXML.so ../../../vendor/acer/$DEVICE/proprietary/libDxWBXML.so
-adb pull /system/lib/libflashplayer.so ../../../vendor/acer/$DEVICE/proprietary/libflashplayer.so
 adb pull /system/lib/libfuse.so ../../../vendor/acer/$DEVICE/proprietary/libfuse.so
 adb pull /system/lib/libHDMIsetting.so ../../../vendor/acer/$DEVICE/proprietary/libHDMIsetting.so
 adb pull /system/lib/libjni_acerAgpsSetting.so ../../../vendor/acer/$DEVICE/proprietary/libjni_acerAgpsSetting.so
@@ -104,7 +103,6 @@ adb pull /system/lib/libOmxVdec.so ../../../vendor/acer/$DEVICE/proprietary/libO
 adb pull /system/lib/libOmxVidEnc.so ../../../vendor/acer/$DEVICE/proprietary/libOmxVidEnc.so
 adb pull /system/lib/librs_jni.so ../../../vendor/acer/$DEVICE/proprietary/librs_jni.so
 adb pull /system/lib/libRS.so ../../../vendor/acer/$DEVICE/proprietary/libRS.so
-adb pull /system/lib/libusbconn.so ../../../vendor/acer/$DEVICE/proprietary/libusbconn.so
 adb pull /system/lib/libvoAACDec.so ../../../vendor/acer/$DEVICE/proprietary/libvoAACDec.so
 adb pull /system/lib/libvoAC3Dec.so ../../../vendor/acer/$DEVICE/proprietary/libvoAC3Dec.so
 adb pull /system/lib/libvoAMRNBDec.so ../../../vendor/acer/$DEVICE/proprietary/libvoAMRNBDec.so
@@ -158,7 +156,6 @@ adb pull /system/lib/libsensor_yamaha.so ../../../vendor/acer/$DEVICE/proprietar
 adb pull /system/lib/libms3c_yamaha.so ../../../vendor/acer/$DEVICE/proprietary/libms3c_yamaha.so
 
 # hw
-adb pull /system/lib/hw/lights.qsd8k.so ../../../vendor/acer/$DEVICE/proprietary/lights.qsd8k.so
 adb pull /system/lib/hw/sensors.salsa.so ../../../vendor/acer/$DEVICE/proprietary/sensors.salsa.so
 
 # something that will need to be replaced
@@ -275,7 +272,6 @@ PRODUCT_COPY_FILES += \\
     vendor/acer/__DEVICE__/proprietary/libvoAMRNBDec.so:/system/lib/libvoAMRNBDec.so \\
     vendor/acer/__DEVICE__/proprietary/libvoAC3Dec.so:/system/lib/libvoAC3Dec.so \\
     vendor/acer/__DEVICE__/proprietary/libvoAACDec.so:/system/lib/libvoAACDec.so \\
-    vendor/acer/__DEVICE__/proprietary/libusbconn.so:/system/lib/libusbconn.so \\
     vendor/acer/__DEVICE__/proprietary/libRS.so:/system/lib/libRS.so \\
     vendor/acer/__DEVICE__/proprietary/librs_jni.so:/system/lib/librs_jni.so \\
     vendor/acer/__DEVICE__/proprietary/libOmxVidEnc.so:/system/lib/libOmxVidEnc.so \\
@@ -293,7 +289,6 @@ PRODUCT_COPY_FILES += \\
     vendor/acer/__DEVICE__/proprietary/libjni_acerAgpsSetting.so:/system/lib/libjni_acerAgpsSetting.so \\
     vendor/acer/__DEVICE__/proprietary/libHDMIsetting.so:/system/lib/libHDMIsetting.so \\
     vendor/acer/__DEVICE__/proprietary/libfuse.so:/system/lib/libfuse.so \\
-    vendor/acer/__DEVICE__/proprietary/libflashplayer.so:/system/lib/libflashplayer.so \\
     vendor/acer/__DEVICE__/proprietary/libDxWBXML.so:/system/lib/libDxWBXML.so \\
     vendor/acer/__DEVICE__/proprietary/libDxDrmJava.so:/system/lib/libDxDrmJava.so \\
     vendor/acer/__DEVICE__/proprietary/libDxAndroidSpecific.so:/system/lib/libDxAndroidSpecific.so \\
@@ -324,7 +319,6 @@ PRODUCT_COPY_FILES += \\
 
 # hw
 PRODUCT_COPY_FILES += \\
-    vendor/acer/__DEVICE__/proprietary/lights.qsd8k.so:/system/lib/hw/lights.qsd8k.so \\
     vendor/acer/__DEVICE__/proprietary/sensors.salsa.so:/system/lib/hw/sensors.salsa.so \\
 
 # something that will need to be replaced
