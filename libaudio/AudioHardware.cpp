@@ -82,8 +82,6 @@ static int new_pathid = -1;
 static int curr_out_device[2] = {-1,-1};
 static int curr_mic_device[2] = {-1,-1};
 static int voice_started = 0;
-static int fd_fm_device = -1;
-static int stream_volume = -300;
 
 int errCount = 0;
 static void * acoustic;
@@ -108,7 +106,6 @@ AudioHardware::AudioHardware() :
     int rc;
 
     acoustic = ::dlopen("/system/lib/libacer_acoustic.so", RTLD_NOW);
-    LOGV("AudioHardware - after dlopen, acoustic=%p", acoustic);
     if (acoustic == NULL) {
         LOGE("Could not open libacer_acoustic.so");
         goto tpa2018_finish;
@@ -518,49 +515,54 @@ static status_t do_route_audio_dev_ctrl(uint32_t device, bool inCall)
     LOGD("Switching audio device to ");
 
     if (device == SND_DEVICE_HANDSET) {
-           out_device[0] = HANDSET_SPKR;
+           out_device[0] = DEV_HANDSET_SPKR;
            // Route from handset when in call but assume speakerphone when
            // not in call for various recording SW
            if (inCall) {
-               mic_device[0] = HANDSET_MIC;
+               mic_device[0] = DEV_HANDSET_MIC;
            } else {
-               mic_device[0] = SPKR_PHONE_MIC;
+               mic_device[0] = DEV_SPKR_PHONE_MIC;
            }
            LOGD("Handset");
     } else if ((device  == SND_DEVICE_BT) || (device == SND_DEVICE_BT_EC_OFF)) {
+           // FIXME: check identifiers
            out_device[0] = BT_SCO_SPKR;
            mic_device[0] = BT_SCO_MIC;
            LOGD("BT Headset");
     } else if (device == SND_DEVICE_SPEAKER ||
                device == SND_DEVICE_SPEAKER_BACK_MIC) {
-           out_device[0] = SPKR_PHONE_MONO;
-           mic_device[0] = SPKR_PHONE_MIC;
+           out_device[0] = DEV_SPKR_PHONE_MONO;
+           mic_device[0] = DEV_SPKR_PHONE_MIC;
            LOGD("Speakerphone");
     } else if (device == SND_DEVICE_HEADSET) {
-           out_device[0] = HEADSET_SPKR_STEREO;
-           mic_device[0] = HEADSET_MIC;
+           out_device[0] = DEV_HEADSET_SPKR_STEREO;
+           mic_device[0] = DEV_HEADSET_MIC;
            LOGD("Stereo Headset");
     } else if (device == SND_DEVICE_HEADSET_AND_SPEAKER) {
-           out_device[0] = SPKR_PHONE_HEADSET_STEREO;
-           mic_device[0] = HEADSET_MIC;
+           out_device[0] = DEV_SPKR_PHONE_HEADSET_STEREO;
+           mic_device[0] = DEV_HEADSET_MIC;
            LOGD("Stereo Headset + Speaker");
     } else if (device == SND_DEVICE_NO_MIC_HEADSET) {
-           out_device[0] = HEADSET_SPKR_STEREO;
-           mic_device[0] = HANDSET_MIC;
+           out_device[0] = DEV_HEADSET_SPKR_STEREO;
+           mic_device[0] = DEV_HANDSET_MIC;
            LOGD("No microphone Wired Headset");
     } else if (device == SND_DEVICE_TTY_FULL) {
+           // FIXME: check identifiers
            out_device[0] = TTY_HEADSET_SPKR;
            mic_device[0] = TTY_HEADSET_MIC;
            LOGD("TTY headset in FULL mode\n");
     } else if (device == SND_DEVICE_TTY_VCO) {
+           // FIXME: check identifiers
            out_device[0] = TTY_HEADSET_SPKR;
-           mic_device[0] = HANDSET_MIC;
+           mic_device[0] = DEV_HANDSET_MIC;
            LOGD("TTY headset in VCO mode\n");
     } else if (device == SND_DEVICE_TTY_HCO) {
-           out_device[0] = HANDSET_SPKR;
+           // FIXME: check identifiers
+           out_device[0] = DEV_HANDSET_SPKR;
            mic_device[0] = TTY_HEADSET_MIC;
            LOGD("TTY headset in HCO mode\n");
     } else if (device == SND_DEVICE_CARKIT) {
+           // FIXME: check identifiers
            out_device[0] = BT_SCO_SPKR;
            mic_device[0] = BT_SCO_MIC;
            LOGD("Carkit");
@@ -732,9 +734,9 @@ out:
 status_t AudioHardware::do_tpa2018_control(int mode)
 {
 
-    if (curr_out_device[0] == SPKR_PHONE_MONO ||
-        curr_out_device[0] == HEADSET_SPKR_STEREO ||
-        curr_out_device[0] == SPKR_PHONE_HEADSET_STEREO) {
+    if (curr_out_device[0] == DEV_SPKR_PHONE_MONO ||
+        curr_out_device[0] == DEV_HEADSET_SPKR_STEREO ||
+        curr_out_device[0] == DEV_SPKR_PHONE_HEADSET_STEREO) {
 
         int rc;
         int fd;
