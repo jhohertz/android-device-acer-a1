@@ -37,6 +37,9 @@ PRODUCT_PACKAGES := \
 	MagicSmokeWallpapers \
 	VisualizationWallpapers \
 	lights.salsa \
+	acer_acoustic \
+	libaudio \
+	libaudiopolicy \
 
 PRODUCT_COPY_FILES += \
 	device/acer/a1/apns-conf.xml:system/etc/apns-conf.xml \
@@ -53,6 +56,9 @@ PRODUCT_COPY_FILES += \
 
 PRODUCT_COPY_FILES += \
     packages/wallpapers/LivePicker/android.software.live_wallpaper.xml:system/etc/permissions/android.software.live_wallpaper.xml
+
+PRODUCT_COPY_FILES += \
+    device/acer/a1/TPA2018.csv:system/etc/TPA2018.csv \
 
 $(call inherit-product, build/target/product/generic.mk)
 
