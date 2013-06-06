@@ -148,6 +148,7 @@ set_led_blink(char const* led_name, int onMS, int offMS)
 {
     char *buf = NULL;
     int rc = 0;
+    int retry = 3;
 
     int buf_size = strlen(LED_TEMPLATE) + 512;
     buf = malloc(buf_size);
@@ -166,15 +167,23 @@ set_led_blink(char const* led_name, int onMS, int offMS)
 	goto err_out;
     }
 
-    /* After this delay_on/delay_of sysfs nodes are available */
+    // After this delay_on/delay_of sysfs nodes are available.
+    // Write can fail in case permission is not yet set by vold. In this case
+    // we need to sleep and retry.
     if (snprintf(buf, buf_size, LED_TEMPLATE, led_name, "delay_on") < 0) {
 	LOGE("set_led_brightness(%s) snprintf delay_on failed\n", led_name);
 	goto err_out;
     }
 
-    if (write_int(buf, onMS)) {
-	LOGE("write_int failed for onMS\n");
-	goto err_out;
+    do {
+	rc = write_int(buf, onMS);
+	if (!rc)
+	    break;
+	sleep(1);
+    } while (--retry > 0);
+
+    if (rc) {
+	LOGE("set_led_brightness(%s) write_int failed\n", led_name);
     }
 
     if (snprintf(buf, buf_size, LED_TEMPLATE, led_name, "delay_off") < 0) {
@@ -182,9 +191,16 @@ set_led_blink(char const* led_name, int onMS, int offMS)
 	goto err_out;
     }
 
-    if (write_int(buf, offMS)) {
-	LOGE("write_int failed for offMS\n");
-	goto err_out;
+    retry = 3;
+    do {
+	rc = write_int(buf, offMS);
+	if (!rc)
+	    break;
+	sleep(1);
+    } while (--retry > 0);
+
+    if (rc) {
+	LOGE("set_led_brightness(%s) write_int failed\n", led_name);
     }
 
     return 0;
