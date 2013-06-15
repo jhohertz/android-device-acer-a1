@@ -34,9 +34,9 @@ ALL_PREBUILT += $(file)
 $(file) : $(LOCAL_PATH)/a1-keypad.kl | $(ACP)
 	$(transform-prebuilt-to-target)
 
-file := $(TARGET_OUT_KEYLAYOUT)/acer-hs-butt.kl
+file := $(TARGET_OUT_KEYLAYOUT)/acer-headset.kl
 ALL_PREBUILT += $(file)
-$(file) : $(LOCAL_PATH)/acer-hs-butt.kl | $(ACP)
+$(file) : $(LOCAL_PATH)/acer-headset.kl | $(ACP)
 	$(transform-prebuilt-to-target)
 
 # unkcm Copyright (c) 2010 Alejandro R. Sedeño <asedeno@mit.edu>
@@ -47,11 +47,11 @@ LOCAL_SRC_FILES := a1-keypad.kcm
 include $(BUILD_KEY_CHAR_MAP)
 
 include $(CLEAR_VARS)
-LOCAL_SRC_FILES := acer-hs-butt.kcm
+LOCAL_SRC_FILES := acer-headset.kcm
 include $(BUILD_KEY_CHAR_MAP)
 
 include $(CLEAR_VARS)
-LOCAL_SRC_FILES := avr.kcm
+LOCAL_SRC_FILES := avr-keypad.kcm
 include $(BUILD_KEY_CHAR_MAP)
 
 
